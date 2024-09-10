@@ -15,6 +15,7 @@
             font-size: 16px;
             margin: 10px;
             border-radius: 15px; /* Lekerekített gombok */
+            position: relative; /* Ahhoz, hogy a feliratot relatívan pozicionálhassuk */
         }
         textarea {
             width: 80%;
@@ -23,6 +24,20 @@
         }
         .speed-control {
             margin: 20px;
+        }
+        .button-label {
+            font-size: 16px; /* Méret a felirathoz */
+            color: #333; /* Szín a felirathoz */
+            margin-top: 5px; /* Távolság a gombtól */
+            display: block; /* Blokk szintű megjelenítés */
+            text-align: center; /* Középre igazítás */
+        }
+        .button-sub-label {
+            font-size: 12px; /* Kisebb méret a második felirathoz */
+            color: #666; /* Szín a második felirathoz */
+            margin-top: 2px; /* Kisebb távolság a gomb alatti felirathoz képest */
+            display: block; /* Blokk szintű megjelenítés */
+            text-align: center; /* Középre igazítás */
         }
     </style>
 </head>
@@ -46,7 +61,11 @@
     </div>
     
     <button id="start-btn" onclick="startSpeech()">Skip to Start</button>
-    <button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;</button>
+    <button id="pause-btn" onclick="pauseSpeech()">
+        &#10074;&#10074; <!-- II szimbólum -->
+        <div class="button-label">Pause</div>
+        <div class="button-sub-label">Resume Playback</div>
+    </button>
     <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
@@ -60,7 +79,7 @@
         let isPaused = false; // Track if speech is paused
 
         function startSpeech() {
-            // Leállítja az esetleg futó beszédet, mielőtt újraindítja
+            // Stop any ongoing speech before starting
             if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
                 window.speechSynthesis.cancel();
             }
@@ -110,14 +129,14 @@
 
         function resumeSpeech() {
             if (isPaused) {
-                if (window.speechSynthesis.paused) {
+                if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    // Start speech from beginning if speech is not active
+                    startSpeech();
+                } else if (window.speechSynthesis.paused) {
                     // Resume the speech if it is paused
                     window.speechSynthesis.resume();
                     isSpeaking = true;
                     isPaused = false;
-                } else if (!window.speechSynthesis.speaking) {
-                    // If no speech is active, start from beginning
-                    startSpeech();
                 }
             }
         }
