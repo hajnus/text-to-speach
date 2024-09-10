@@ -54,8 +54,8 @@ textarea {
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
     <script>
 let utterance = null; // Global variable for the SpeechSynthesisUtterance
-let words = []; // Array to hold words
-let currentIndex = 0; // Index for tracking current word
+let sentences = []; // Array to hold sentences
+let currentIndex = 0; // Index for tracking current sentence
 
 function speakText() {
     // Leállítja az esetleg futó beszédet, mielőtt újraindítja
@@ -64,14 +64,13 @@ function speakText() {
     }
 
     const text = document.getElementById('text-input').value;
-    words = text.split(' '); // Szavakra bontás
+    sentences = text.match(/[^.!?]*[.!?]/g) || []; // Mondatok keresése
     currentIndex = 0;
 
-    function speakNextChunk() {
-        if (currentIndex < words.length) {
-            // A következő 15 szó
-            const chunk = words.slice(currentIndex, currentIndex + 15).join(' ');
-            utterance = new SpeechSynthesisUtterance(chunk);
+    function speakNextSentence() {
+        if (currentIndex < sentences.length) {
+            const sentence = sentences[currentIndex];
+            utterance = new SpeechSynthesisUtterance(sentence);
 
             // Get selected speech rate from dropdown
             const rate = document.getElementById('speed-select').value;
@@ -81,23 +80,24 @@ function speakText() {
             utterance.lang = 'en-US'; // Change as needed
             utterance.pitch = 1; // Range from 0 to 2
 
-            // Eseménykezelő a szavak kiírásához
+            // Eseménykezelő a mondatok kiírásához
             utterance.onstart = function() {
-                const start = Math.max(currentIndex - 5, 0);
-                const wordsToDisplay = words.slice(start, currentIndex + 15).join(' ');
-                document.getElementById('current-sentence').innerText = wordsToDisplay + (currentIndex + 15 < words.length ? '...' : '');
+                document.getElementById('current-sentence').innerText = sentence.trim();
             };
 
             utterance.onend = function() {
-                currentIndex += 15;
-                setTimeout(speakNextChunk, 1000); // 1 másodperces késleltetés a következő szóra
+                currentIndex++;
+                setTimeout(speakNextSentence, 2000); // 2 másodperces késleltetés a következő mondatra
             };
 
-            window.speechSynthesis.speak(utterance);
+            // Kezdi el a beszédet 2 másodperces késéssel
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 2000);
         }
     }
 
-    speakNextChunk();
+    speakNextSentence();
 }
 
 function pauseSpeech() {
