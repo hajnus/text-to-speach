@@ -45,90 +45,90 @@
         </select>
     </div>
     
-<button id="start-btn" onclick="startSpeech()">Skip to Start</button>
-<button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;</button>
-<button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>    
+    <button id="start-btn" onclick="startSpeech()">Skip to Start</button>
+    <button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;</button>
+    <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
 
     <script>
-let utterance = null; // Global variable for the SpeechSynthesisUtterance
-let sentences = []; // Array to hold sentences
-let currentIndex = 0; // Index for tracking current sentence
-let isSpeaking = false; // Track if speech is currently active
-let isPaused = false; // Track if speech is paused
+        let utterance = null; // Global variable for the SpeechSynthesisUtterance
+        let sentences = []; // Array to hold sentences
+        let currentIndex = 0; // Index for tracking current sentence
+        let isSpeaking = false; // Track if speech is currently active
+        let isPaused = false; // Track if speech is paused
 
-function startSpeech() {
-    // Leállítja az esetleg futó beszédet, mielőtt újraindítja
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-    }
+        function startSpeech() {
+            // Leállítja az esetleg futó beszédet, mielőtt újraindítja
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+            }
 
-    const text = document.getElementById('text-input').value;
-    sentences = text.match(/[^.!?]*[.!?]/g) || [];
-    currentIndex = 0;
-    isSpeaking = true;
-    isPaused = false; // Reset pause state
-
-    function speakNextSentence() {
-        if (currentIndex < sentences.length) {
-            const sentence = sentences[currentIndex];
-            utterance = new SpeechSynthesisUtterance(sentence);
-
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
-            utterance.lang = 'en-US';
-            utterance.pitch = 1;
-
-            document.getElementById('current-sentence').innerText = sentence.trim();
-
-            setTimeout(() => {
-                window.speechSynthesis.speak(utterance);
-            }, 2000);
-
-            utterance.onend = function() {
-                currentIndex++;
-                setTimeout(speakNextSentence, 2000);
-            };
-        } else {
-            isSpeaking = false; // Speech finished
-        }
-    }
-
-    speakNextSentence();
-}
-
-function pauseSpeech() {
-    if (window.speechSynthesis.speaking) {
-        // Pause the speech
-        window.speechSynthesis.pause();
-        isSpeaking = false;
-        isPaused = true;
-    }
-}
-
-function resumeSpeech() {
-    if (isPaused) {
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-            // Start speech from beginning if speech is not active
-            startSpeech();
-        } else if (window.speechSynthesis.paused) {
-            // Resume the speech if it is paused
-            window.speechSynthesis.resume();
+            const text = document.getElementById('text-input').value;
+            sentences = text.match(/[^.!?]*[.!?]/g) || [];
+            currentIndex = 0;
             isSpeaking = true;
-            isPaused = false;
-        }
-    }
-}
+            isPaused = false; // Reset pause state
 
-function stopSpeech() {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-        isPaused = false;
-    }
-}
+            function speakNextSentence() {
+                if (currentIndex < sentences.length) {
+                    const sentence = sentences[currentIndex];
+                    utterance = new SpeechSynthesisUtterance(sentence);
+
+                    const rate = document.getElementById('speed-select').value;
+                    utterance.rate = parseFloat(rate);
+                    utterance.lang = 'en-US';
+                    utterance.pitch = 1;
+
+                    document.getElementById('current-sentence').innerText = sentence.trim();
+
+                    setTimeout(() => {
+                        window.speechSynthesis.speak(utterance);
+                    }, 2000);
+
+                    utterance.onend = function() {
+                        currentIndex++;
+                        setTimeout(speakNextSentence, 2000);
+                    };
+                } else {
+                    isSpeaking = false; // Speech finished
+                }
+            }
+
+            speakNextSentence();
+        }
+
+        function pauseSpeech() {
+            if (window.speechSynthesis.speaking) {
+                // Pause the speech
+                window.speechSynthesis.pause();
+                isSpeaking = false;
+                isPaused = true;
+            }
+        }
+
+        function resumeSpeech() {
+            if (isPaused) {
+                if (window.speechSynthesis.paused) {
+                    // Resume the speech if it is paused
+                    window.speechSynthesis.resume();
+                    isSpeaking = true;
+                    isPaused = false;
+                } else if (!window.speechSynthesis.speaking) {
+                    // If no speech is active, start from beginning
+                    startSpeech();
+                }
+            }
+        }
+
+        function stopSpeech() {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                isPaused = false;
+            }
+        }
     </script>
 </body>
 </html>
