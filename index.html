@@ -39,6 +39,9 @@
             display: block; /* Blokk szintű megjelenítés */
             text-align: center; /* Középre igazítás */
         }
+        .button-container {
+            display: inline-block; /* A gomb és a feliratok egy sorba rendezése */
+        }
     </style>
 </head>
 <body>
@@ -61,12 +64,16 @@
     </div>
     
     <button id="start-btn" onclick="startSpeech()">Skip to Start</button>
-    <button id="pause-btn" onclick="pauseSpeech()">
-        &#10074;&#10074; <!-- II szimbólum -->
+    
+    <div class="button-container">
+        <button id="pause-btn" onclick="pauseSpeech()">
+            &#10074;&#10074; <!-- II szimbólum -->
+        </button>
         <div class="button-label">Pause</div>
-    </button>
-    <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
         <div class="button-sub-label">Resume Playback</div>
+    </div>
+
+    <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
