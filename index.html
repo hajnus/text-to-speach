@@ -51,10 +51,10 @@ textarea {
     <button onclick="resumeSpeech()">&#9654;</button> <!-- > szimbólum -->
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
-    <div id="current-word" style="font-size: 40px; margin-top: 20px;"></div>
-
+    <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
     <script>
-        let utterance = null; // Global variable for the SpeechSynthesisUtterance
+  let utterance = null; // Global variable for the SpeechSynthesisUtterance
+let sentenceStartTime = null; // Az utolsó mondat kezdési időpontja
 
 function speakText() {
     // Leállítja az esetleg futó beszédet, mielőtt újraindítja
@@ -73,17 +73,28 @@ function speakText() {
     utterance.lang = 'en-US'; // Change as needed
     utterance.pitch = 1; // Range from 0 to 2
 
-    // Eseménykezelő a szavak kiírásához
+    // Eseménykezelő a mondatok kiírásához
     utterance.onboundary = function(event) {
-        if (event.name === 'word') {
-            const spokenWord = text.substring(event.charIndex).split(' ')[0];
-            document.getElementById('current-word').innerText = spokenWord;
+        if (event.name === 'sentence') {
+            if (sentenceStartTime) {
+                // Beállítja a kijelzőre a következő mondatot
+                setTimeout(() => {
+                    const sentences = text.match(/[^.!?]*[.!?]/g) || [];
+                    const currentSentence = sentences.shift();
+                    document.getElementById('current-sentence').innerText = currentSentence.trim();
+                    // Új mondat kezdési időpont beállítása
+                    sentenceStartTime = new Date().getTime();
+                }, 1000); // 1 másodperces késleltetés
+            } else {
+                sentenceStartTime = new Date().getTime();
+            }
         }
     };
 
     // Speak the text
     window.speechSynthesis.speak(utterance);
 }
+
         function pauseSpeech() {
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.pause();
