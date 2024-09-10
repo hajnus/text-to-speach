@@ -15,7 +15,6 @@
             font-size: 16px;
             margin: 10px;
             border-radius: 15px; /* Lekerekített gombok */
-            position: relative; /* Ahhoz, hogy a feliratot relatívan pozicionálhassuk */
         }
         textarea {
             width: 80%;
@@ -25,22 +24,13 @@
         .speed-control {
             margin: 20px;
         }
-        .button-label {
-            font-size: 16px; /* Méret a felirathoz */
-            color: #333; /* Szín a felirathoz */
-            margin-top: 5px; /* Távolság a gombtól */
-            display: block; /* Blokk szintű megjelenítés */
-            text-align: center; /* Középre igazítás */
-        }
-        .button-sub-label {
-            font-size: 12px; /* Kisebb méret a második felirathoz */
-            color: #666; /* Szín a második felirathoz */
-            margin-top: 2px; /* Kisebb távolság a gomb alatti felirathoz képest */
-            display: block; /* Blokk szintű megjelenítés */
-            text-align: center; /* Középre igazítás */
-        }
         .button-container {
-            display: inline-block; /* A gomb és a feliratok egy sorba rendezése */
+            display: inline-block;
+            text-align: center;
+        }
+        .button-container span {
+            display: block;
+            font-size: smaller;
         }
     </style>
 </head>
@@ -63,17 +53,21 @@
         </select>
     </div>
     
-    <button id="start-btn" onclick="startSpeech()">Skip to Start</button>
-    
     <div class="button-container">
-        <button id="pause-btn" onclick="pauseSpeech()">
-            &#10074;&#10074; <!-- II szimbólum -->
-        </button>
-        <div class="button-label">Pause</div>
-        <div class="button-sub-label">Resume Playback</div>
+        <button id="start-btn" onclick="startSpeech()">Skip to Start</button>
     </div>
 
-    <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
+    <div class="button-container">
+        <button id="pause-btn" onclick="pauseSpeech()">
+            &#10074;&#10074;
+            <span>Pause</span>
+        </button>
+        <button id="resume-btn" onclick="resumeSpeech()">
+            &#9654;
+            <span>Resume Playback</span>
+        </button>
+    </div>
+
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
@@ -86,7 +80,7 @@
         let isPaused = false; // Track if speech is paused
 
         function startSpeech() {
-            // Stop any ongoing speech before starting
+            // Leállítja az esetleg futó beszédet, mielőtt újraindítja
             if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
                 window.speechSynthesis.cancel();
             }
