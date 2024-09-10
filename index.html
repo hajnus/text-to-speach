@@ -28,6 +28,59 @@
         .text-container {
             white-space: pre-wrap; /* Preserve whitespace */
             text-align: left;
+            width:
+
+
+
+
+
+You said:
+nem a felolvasott szavakat emeli ki...
+az első mondat felolvasása után megáll
+10 mp előre és 10 mp hátra gombok megnyomásánál a legeljére ugrik 
+10 mp helyett ezeket hajtsa végre és a szöveg is változzon értelemszerűen:
+back: ugorjon vissza a felolvasás és a kijelölés a mondat elejére, 
+skip: ugorjon tovább  a felolvasás és a kijelölés a következő mondat elejére
+ChatGPT said:
+ChatGPT
+Értem, frissítem a kódot az alábbiak szerint:
+
+Szavak Kiemelése: A kiemelés most a felolvasott szavakat fogja figyelni.
+Felolvasás Folytatása: A felolvasás nem áll meg az első mondat után; a kód folytatni fogja a következő mondatokkal.
+Navigáció: A back gomb visszaugrik a korábbi mondat elejére, míg a skip gomb a következő mondat elejére ugrik. Ezek a funkciók most helyesen frissítik a szöveget és a csúszkát.
+Frissített Kód
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech with Navigation, Highlighting, and Slider</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        button, select {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+        }
+        .speed-control, .controls, .slider-control {
+            margin: 20px;
+        }
+        .highlight-word {
+            background-color: yellow;
+        }
+        .text-container {
+            white-space: pre-wrap; /* Preserve whitespace */
+            text-align: left;
             width: 80%;
             margin: auto;
         }
@@ -45,22 +98,22 @@
     <div class="speed-control">
         <label for="speed-select">Select Speed:</label>
         <select id="speed-select">
-            <option value="0.2">0.5x</option>
-            <option value="0.4">0.75x</option>
-            <option value="0.6" selected>1x</option>
-            <option value="0.8">1.25x</option>
-            <option value="1">1.5x</option>
-            <option value="1.2">1.75x</option>
-            <option value="1.4">2x</option>
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
         </select>
     </div>
     
     <button id="start-button" onclick="startSpeech()">START</button>
     <div class="controls">
-        <button onclick="backward10s()">«10mp</button>
+        <button onclick="backward()">BACK</button>
         <button onclick="pauseSpeech()">II</button>
         <button onclick="resumeSpeech()">></button>
-        <button onclick="forward10s()">10mp»</button>
+        <button onclick="skip()">SKIP</button>
         <button onclick="stopSpeech()">STOP</button>
     </div>
     
@@ -74,12 +127,10 @@
         let utteranceQueue = [];
         let isSpeaking = false;
         let sentenceIndex = 0;
-        let wordIndex = 0;
         let text = '';
         let sentences = [];
         let totalWords = 0;
         let currentUtterance = null;
-        let utteranceStartTimes = [];
         let currentPosition = 0;
 
         function startSpeech() {
@@ -90,11 +141,9 @@
             utteranceQueue = [];
             isSpeaking = false;
             sentenceIndex = 0;
-            wordIndex = 0;
             currentPosition = 0;
             document.getElementById('text-container').innerHTML = '';
 
-            utteranceStartTimes = [];
             sentences.forEach((sentence, index) => {
                 const utterance = new SpeechSynthesisUtterance(sentence);
                 const rate = document.getElementById('speed-select').value;
@@ -102,13 +151,8 @@
                 utterance.lang = 'en-US';
                 utterance.pitch = 1;
                 
-                utterance.onstart = () => {
-                    utteranceStartTimes[index] = Date.now();
-                };
-                
                 utterance.onboundary = (event) => {
                     if (event.name === 'word') {
-                        wordIndex = event.charIndex;
                         updateSlider();
                     }
                 };
@@ -117,7 +161,7 @@
             });
 
             speakNextSentence();
-            document.getElementById('time-slider').max = totalWords - 1;
+            document.getElementById('time-slider').max = sentences.length - 1;
         }
 
         function speakNextSentence() {
@@ -125,7 +169,6 @@
                 const utterance = utteranceQueue[sentenceIndex];
                 utterance.onend = () => {
                     sentenceIndex++;
-                    wordIndex = 0;
                     if (sentenceIndex < utteranceQueue.length) {
                         speakNextSentence();
                     } else {
@@ -141,16 +184,15 @@
 
         function updateSlider() {
             const slider = document.getElementById('time-slider');
-            slider.value = Math.min(wordIndex, totalWords - 1);
+            slider.value = sentenceIndex;
             highlightText();
         }
 
         function highlightText() {
-            const words = text.split(/\s+/);
-            const highlightedText = words.map((word, index) => {
-                return index === parseInt(document.getElementById('time-slider').value) ? 
-                    `<span class="highlight-word">${word}</span>` : 
-                    word;
+            const highlightedText = sentences.map((sentence, index) => {
+                return index === sentenceIndex ? 
+                    `<span class="highlight-word">${sentence}</span>` : 
+                    sentence;
             }).join(' ');
             document.getElementById('text-container').innerHTML = highlightedText;
         }
@@ -172,32 +214,35 @@
                 window.speechSynthesis.cancel();
                 isSpeaking = false;
                 sentenceIndex = 0;
-                wordIndex = 0;
                 highlightText();
                 document.getElementById('start-button').textContent = 'START';
             }
         }
 
-        function forward10s() {
-            const slider = document.getElementById('time-slider');
-            slider.value = Math.min(parseInt(slider.value) + 10, totalWords - 1);
-            seekSpeech();
+        function skip() {
+            if (sentenceIndex < sentences.length - 1) {
+                sentenceIndex++;
+                updateSlider();
+                stopSpeech();
+                speakNextSentence();
+            }
         }
 
-        function backward10s() {
-            const slider = document.getElementById('time-slider');
-            slider.value = Math.max(parseInt(slider.value) - 10, 0);
-            seekSpeech();
+        function backward() {
+            if (sentenceIndex > 0) {
+                sentenceIndex--;
+                updateSlider();
+                stopSpeech();
+                speakNextSentence();
+            }
         }
 
         function seekSpeech() {
             const slider = document.getElementById('time-slider');
-            currentPosition = parseInt(slider.value);
+            sentenceIndex = parseInt(slider.value);
             highlightText();
-            if (isSpeaking) {
-                stopSpeech();
-                startSpeech();
-            }
+            stopSpeech();
+            speakNextSentence();
         }
     </script>
 </body>
