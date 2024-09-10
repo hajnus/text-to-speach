@@ -25,12 +25,28 @@
             background-color: #000;
             color: #fff;
         }
-        textarea {
-            width: 80%;
-            height: 100px;
-            border-radius: 15px; /* Lekerekített szövegdoboz */
-            background-color: lightgrey;
-        }
+textarea {
+    width: 80%;
+    height: 100px;
+    border-radius: 15px;
+    background-color: lightgrey;
+    padding: 10px;
+    box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
+}
+
+button#clear-btn {
+    width: 40px; /* Gomb szélessége */
+    height: 40px; /* Gomb magassága */
+    border-radius: 50%; /* Kerek gomb */
+    border: 2px solid #000;
+    background-color: #fff;
+    color: #000;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: -30px; /* Közel helyezkedik el a szövegdobozhoz */
+    padding: 0;
+    line-height: 1;
+}
         .speed-control {
             margin: 20px;
         }
@@ -48,21 +64,22 @@
             transform: translateX(-50%);
             margin-top: 5px;
         }
-        #clear-btn {
-            float: right;
-            cursor: pointer;
-            font-size: 20px;
-            border: none;
-            background: none;
+.text-input-container {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
+}
+
         }
     </style>
 </head>
 <body>
     <h1>Text to Speech with Speed Control and Pause</h1>
     
+<div class="text-input-container">
     <textarea id="text-input" placeholder="Enter text here..."></textarea>
     <button id="clear-btn" onclick="document.getElementById('text-input').value=''">×</button>
-    <button id="clear-btn" onclick="document.getElementById('text-input').value=''">×</button><br>
+</div>
     
     <!-- Speed control dropdown -->
     <div class="speed-control">
