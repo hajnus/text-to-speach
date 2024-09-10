@@ -3,198 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech with Speed Control and Pause</title>
+    <title>Main Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
         }
-button {
-    width: 100px; /* Gomb szélessége */
-}
-        .button-container {
-    display: inline-block;
-    text-align: center;
-    position: relative; /* Fontos, hogy a span-t a button alá helyezzük */
-    margin: 10px;
-}
-
-.button-container span {
-    display: block;
-    font-size: smaller;
-    position: absolute;
-    bottom: -30px; /* A gomb alatt, állítsd be az igényed szerint */
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 5px;
-}
-button.active {
-    background-color: #000;
-    color: #fff;
-}
-textarea {
-    width: 80%;
-    height: 100px;
-    border-radius: 15px; /* Lekerekített szövegdoboz */
-    color: lightgrey; /* Javítva a szín helyesírását */
-}
-        .speed-control {
-            margin: 20px;
-        }
         .button-container {
             display: inline-block;
+            margin: 20px;
+        }
+        .button-container button {
+            width: 100px; /* Gomb szélessége és magassága */
+            height: 100px;
+            border-radius: 50%; /* Kerek gomb */
+            font-size: 24px;
+            border: 2px solid #000;
+            background-color: #fff;
+            color: #000;
+            cursor: pointer;
+            line-height: 100px; /* Középre igazítás */
             text-align: center;
         }
-        .button-container span {
-            display: block;
-            font-size: smaller;
+        .button-container button.active {
+            background-color: #000;
+            color: #fff;
         }
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Speed Control and Pause</h1>
-    
-    <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
-    
-    <!-- Speed control dropdown -->
-    <div class="speed-control">
-        <label for="speed-select">Select Speed:</label>
-        <select id="speed-select">
-            <option value="0.2">0.5x</option>
-            <option value="0.4">0.75x</option>
-            <option value="0.6" selected>1x</option>
-            <option value="0.8">1.25x</option>
-            <option value="1">1.5x</option>
-            <option value="1.25">1.75x</option>
-            <option value="1.5">2x</option>
-        </select>
-    </div>
+    <h1>HL</h1>
+    <textarea id="placeholder" placeholder="Enter text here..."></textarea><br>
     
     <div class="button-container">
-        <button id="start-btn" onclick="startSpeech()">I◁</button>
-   <!--         <span>SKIP to Start</span>
-        -->
+        <button id="skip-btn" onclick="window.location.href='nextpage.html'">></button>
+        <span>Skip to Start</span>
     </div>
-
-    <div class="button-container">
-        <button id="pause-btn" onclick="pauseSpeech()">
-            &#10074;&#10074;
-   <!--         <span>PAUSE</span>
-            -->
-        </button>
-        <button id="resume-btn" onclick="resumeSpeech()">
-            &#9654;
-   <!--         <span>RESUME playback</span>
-            -->
-        </button>
-    </div>
-
-    <button onclick="stopSpeech()">■</button> <!-- Stop gomb -->
-    <!--        <span>STOP</span>
-    -->
-
-    <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
-
-    <script>
-let utterance = null; // Global variable for the SpeechSynthesisUtterance
-let sentences = []; // Array to hold sentences
-let currentIndex = 0; // Index for tracking current sentence
-let isSpeaking = false; // Track if speech is currently active
-let isPaused = false; // Track if speech is paused
-
-// Function to set button states
-function changeButtonState(buttonId) {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-    });
-    if (buttonId) {
-        document.getElementById(buttonId).classList.add('active');
-    }
-}
-
-function startSpeech() {
-    // Leállítja az esetleg futó beszédet, mielőtt újraindítja
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-    }
-
-    const text = document.getElementById('text-input').value;
-    if (!text.trim()) {
-        // Ha nincs szöveg, ne folytassa
-        return;
-    }
-
-    sentences = text.match(/[^.!?]*[.!?]/g) || [];
-    currentIndex = 0;
-    isSpeaking = true;
-    isPaused = false; // Reset pause state
-
-    changeButtonState('start-btn'); // Aktív gomb
-
-    function speakNextSentence() {
-        if (currentIndex < sentences.length) {
-            const sentence = sentences[currentIndex];
-            utterance = new SpeechSynthesisUtterance(sentence);
-
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
-            utterance.lang = 'en-US';
-            utterance.pitch = 1;
-
-            document.getElementById('current-sentence').innerText = sentence.trim();
-
-            setTimeout(() => {
-                window.speechSynthesis.speak(utterance);
-            }, 200);
-
-            utterance.onend = function() {
-                currentIndex++;
-                setTimeout(speakNextSentence, 200);
-            };
-        } else {
-            isSpeaking = false; // Speech finished
-            changeButtonState(''); // Gomb állapot visszaállítása
-        }
-    }
-
-    speakNextSentence();
-}
-
-function pauseSpeech() {
-    if (window.speechSynthesis.speaking) {
-        // Pause the speech
-        window.speechSynthesis.pause();
-        isSpeaking = false;
-        isPaused = true;
-        changeButtonState('pause-btn'); // Aktív gomb
-    }
-}
-
-function resumeSpeech() {
-    if (isPaused) {
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-            // Start speech from beginning if speech is not active
-            startSpeech();
-        } else if (window.speechSynthesis.paused) {
-            // Resume the speech if it is paused
-            window.speechSynthesis.resume();
-            isSpeaking = true;
-            isPaused = false;
-            changeButtonState('resume-btn'); // Aktív gomb
-        }
-    }
-}
-
-function stopSpeech() {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-        isPaused = false;
-        changeButtonState(''); // Minden gomb deaktiválása
-    }
-}
-    </script>
 </body>
 </html>
