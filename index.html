@@ -22,10 +22,13 @@
         .speed-control {
             margin: 20px;
         }
+        .pause-resume-btns {
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Speed Control, Pause, and Sentence Breaks</h1>
+    <h1>Text to Speech with Speed Control, Pause, and Resume</h1>
     
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
@@ -44,8 +47,10 @@
     </div>
     
     <button onclick="speakText()">Speak Text</button>
-    <button onclick="pauseSpeech()">Pause</button>
-    <button onclick="resumeSpeech()">Resume</button>
+    <div class="pause-resume-btns">
+        <button onclick="pauseSpeech()">II</button>
+        <button onclick="resumeSpeech()">></button>
+    </div>
 
     <script>
         let utteranceQueue = []; // Queue for the utterances
