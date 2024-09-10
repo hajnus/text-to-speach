@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech with Navigation, Highlighting, and Slider</title>
+    <title>Text to Speech with Navigation and Word Highlighting</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,6 +14,7 @@
             padding: 10px 20px;
             font-size: 16px;
             margin: 10px;
+            border-radius: 10px;
         }
         textarea {
             width: 80%;
@@ -26,71 +27,22 @@
             background-color: yellow;
         }
         .text-container {
-            white-space: pre-wrap; /* Preserve whitespace */
-            text-align: left;
-            width:
-
-
-
-
-
-You said:
-nem a felolvasott szavakat emeli ki...
-az első mondat felolvasása után megáll
-10 mp előre és 10 mp hátra gombok megnyomásánál a legeljére ugrik 
-10 mp helyett ezeket hajtsa végre és a szöveg is változzon értelemszerűen:
-back: ugorjon vissza a felolvasás és a kijelölés a mondat elejére, 
-skip: ugorjon tovább  a felolvasás és a kijelölés a következő mondat elejére
-ChatGPT said:
-ChatGPT
-Értem, frissítem a kódot az alábbiak szerint:
-
-Szavak Kiemelése: A kiemelés most a felolvasott szavakat fogja figyelni.
-Felolvasás Folytatása: A felolvasás nem áll meg az első mondat után; a kód folytatni fogja a következő mondatokkal.
-Navigáció: A back gomb visszaugrik a korábbi mondat elejére, míg a skip gomb a következő mondat elejére ugrik. Ezek a funkciók most helyesen frissítik a szöveget és a csúszkát.
-Frissített Kód
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech with Navigation, Highlighting, and Slider</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        button, select {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 10px;
-        }
-        textarea {
-            width: 80%;
-            height: 100px;
-        }
-        .speed-control, .controls, .slider-control {
-            margin: 20px;
-        }
-        .highlight-word {
-            background-color: yellow;
-        }
-        .text-container {
-            white-space: pre-wrap; /* Preserve whitespace */
+            white-space: pre-wrap;
             text-align: left;
             width: 80%;
             margin: auto;
         }
         .slider {
-            width: 80%;
+            width: 95%; /* Almost full screen width */
+        }
+        .inactive {
+            opacity: 0.5;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Speed Control, Pause, Resume, and Navigation</h1>
+    <h1>Text to Speech with Word Highlighting and Navigation</h1>
     
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
@@ -110,10 +62,10 @@ Copy code
     
     <button id="start-button" onclick="startSpeech()">START</button>
     <div class="controls">
-        <button onclick="backward()">BACK</button>
+        <button id="back-button" class="inactive" onclick="backward()">BACK</button>
         <button onclick="pauseSpeech()">II</button>
         <button onclick="resumeSpeech()">></button>
-        <button onclick="skip()">SKIP</button>
+        <button id="skip-button" class="inactive" onclick="skip()">SKIP</button>
         <button onclick="stopSpeech()">STOP</button>
     </div>
     
@@ -126,26 +78,24 @@ Copy code
     <script>
         let utteranceQueue = [];
         let isSpeaking = false;
-        let sentenceIndex = 0;
+        let wordIndex = 0;
         let text = '';
-        let sentences = [];
-        let totalWords = 0;
+        let words = [];
         let currentUtterance = null;
-        let currentPosition = 0;
+        let characterLength = 0;
 
         function startSpeech() {
             text = document.getElementById('text-input').value;
-            sentences = text.split(/(?<=[.!?])\s+/);
-            totalWords = sentences.reduce((acc, sentence) => acc + sentence.split(/\s+/).length, 0);
+            words = text.match(/\b\w+('|’)?\w*\b/g) || [];
+            characterLength = text.length;
 
             utteranceQueue = [];
             isSpeaking = false;
-            sentenceIndex = 0;
-            currentPosition = 0;
+            wordIndex = 0;
             document.getElementById('text-container').innerHTML = '';
 
-            sentences.forEach((sentence, index) => {
-                const utterance = new SpeechSynthesisUtterance(sentence);
+            words.forEach((word, index) => {
+                const utterance = new SpeechSynthesisUtterance(word);
                 const rate = document.getElementById('speed-select').value;
                 utterance.rate = parseFloat(rate);
                 utterance.lang = 'en-US';
@@ -160,17 +110,17 @@ Copy code
                 utteranceQueue.push(utterance);
             });
 
-            speakNextSentence();
-            document.getElementById('time-slider').max = sentences.length - 1;
+            speakNextWord();
+            document.getElementById('time-slider').max = characterLength;
         }
 
-        function speakNextSentence() {
-            if (sentenceIndex < utteranceQueue.length) {
-                const utterance = utteranceQueue[sentenceIndex];
+        function speakNextWord() {
+            if (wordIndex < utteranceQueue.length) {
+                const utterance = utteranceQueue[wordIndex];
                 utterance.onend = () => {
-                    sentenceIndex++;
-                    if (sentenceIndex < utteranceQueue.length) {
-                        speakNextSentence();
+                    wordIndex++;
+                    if (wordIndex < utteranceQueue.length) {
+                        speakNextWord();
                     } else {
                         isSpeaking = false;
                     }
@@ -184,15 +134,15 @@ Copy code
 
         function updateSlider() {
             const slider = document.getElementById('time-slider');
-            slider.value = sentenceIndex;
+            slider.value = wordIndex;
             highlightText();
         }
 
         function highlightText() {
-            const highlightedText = sentences.map((sentence, index) => {
-                return index === sentenceIndex ? 
-                    `<span class="highlight-word">${sentence}</span>` : 
-                    sentence;
+            const highlightedText = words.map((word, index) => {
+                return index === wordIndex ? 
+                    `<span class="highlight-word">${word}</span>` : 
+                    word;
             }).join(' ');
             document.getElementById('text-container').innerHTML = highlightedText;
         }
@@ -213,36 +163,26 @@ Copy code
             if (isSpeaking) {
                 window.speechSynthesis.cancel();
                 isSpeaking = false;
-                sentenceIndex = 0;
+                wordIndex = 0;
                 highlightText();
                 document.getElementById('start-button').textContent = 'START';
             }
         }
 
         function skip() {
-            if (sentenceIndex < sentences.length - 1) {
-                sentenceIndex++;
-                updateSlider();
-                stopSpeech();
-                speakNextSentence();
-            }
+            // Skip functionality will be inactive for now
         }
 
         function backward() {
-            if (sentenceIndex > 0) {
-                sentenceIndex--;
-                updateSlider();
-                stopSpeech();
-                speakNextSentence();
-            }
+            // Backward functionality will be inactive for now
         }
 
         function seekSpeech() {
             const slider = document.getElementById('time-slider');
-            sentenceIndex = parseInt(slider.value);
+            wordIndex = Math.round(slider.value);
             highlightText();
             stopSpeech();
-            speakNextSentence();
+            speakNextWord();
         }
     </script>
 </body>
