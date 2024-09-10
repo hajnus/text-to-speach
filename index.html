@@ -25,7 +25,7 @@
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Speed Control and Pause</h1>
+    <h1>Text to Speech with Speed Control, Pause, and Sentence Breaks</h1>
     
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
@@ -33,13 +33,13 @@
     <div class="speed-control">
         <label for="speed-select">Select Speed:</label>
         <select id="speed-select">
-            <option value="0.2">0.5x</option>
-            <option value="0.4">0.75x</option>
-            <option value="0.6" selected>1x</option>
-            <option value="0.8">1.25x</option>
-            <option value="1">1.5x</option>
-            <option value="1.2">1.75x</option>
-            <option value="1.4">2x</option>
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
         </select>
     </div>
     
@@ -48,26 +48,57 @@
     <button onclick="resumeSpeech()">Resume</button>
 
     <script>
-        let utterance = null; // Global variable for the SpeechSynthesisUtterance
+        let utteranceQueue = []; // Queue for the utterances
+        let isSpeaking = false;  // Flag to check if speech is ongoing
+        let sentenceIndex = 0;   // Current sentence index
 
         function speakText() {
             const text = document.getElementById('text-input').value;
-            utterance = new SpeechSynthesisUtterance(text);
-            
-            // Get selected speech rate from dropdown
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
-            
-            // Set voice options (optional)
-            utterance.lang = 'en-US'; // Change as needed
-            utterance.pitch = 1; // Range from 0 to 2
-            
-            // Speak the text
-            window.speechSynthesis.speak(utterance);
+            const sentences = text.split(/(?<=[.!?])\s+/); // Split by sentence
+
+            // Clear previous utterances
+            utteranceQueue = [];
+            isSpeaking = false;
+            sentenceIndex = 0;
+
+            sentences.forEach(sentence => {
+                const utterance = new SpeechSynthesisUtterance(sentence);
+                
+                // Get selected speech rate from dropdown
+                const rate = document.getElementById('speed-select').value;
+                utterance.rate = parseFloat(rate);
+                
+                // Set voice options (optional)
+                utterance.lang = 'en-US'; // Change as needed
+                utterance.pitch = 1; // Range from 0 to 2
+                
+                // Add utterance to queue
+                utteranceQueue.push(utterance);
+            });
+
+            // Start speaking
+            speakNextSentence();
+        }
+
+        function speakNextSentence() {
+            if (sentenceIndex < utteranceQueue.length) {
+                const utterance = utteranceQueue[sentenceIndex];
+                utterance.onend = () => {
+                    // Add delay between sentences
+                    setTimeout(() => {
+                        sentenceIndex++;
+                        speakNextSentence();
+                    }, 1500); // Adjust the delay as needed (1500 ms = 1.5 seconds)
+                };
+                window.speechSynthesis.speak(utterance);
+                isSpeaking = true;
+            } else {
+                isSpeaking = false;
+            }
         }
 
         function pauseSpeech() {
-            if (window.speechSynthesis.speaking) {
+            if (isSpeaking) {
                 window.speechSynthesis.pause();
             }
         }
