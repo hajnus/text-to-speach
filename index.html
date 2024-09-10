@@ -26,7 +26,7 @@
             color: #fff;
         }
 textarea {
-    width: 80%;
+    width: calc(100% - 50px); /* Teljes szélesség minusz a gomb szélessége és margója */
     height: 100px;
     border-radius: 15px;
     background-color: lightgrey;
@@ -34,18 +34,26 @@ textarea {
     box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
 }
 
+
 button#clear-btn {
-    width: 40px; /* Gomb szélessége */
-    height: 40px; /* Gomb magassága */
-    border-radius: 50%; /* Kerek gomb */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     border: 2px solid #000;
     background-color: #fff;
     color: #000;
     cursor: pointer;
     font-size: 20px;
-    margin-left: -30px; /* Közel helyezkedik el a szövegdobozhoz */
+    margin-left: -30px;
     padding: 0;
     line-height: 1;
+}
+button#start-btn {
+    background-color: lightcyan; /* Alapértelmezett szín */
+}
+button#start-btn.active {
+    background-color: #000;
+    color: #fff;
 }
         .speed-control {
             margin: 20px;
