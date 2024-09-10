@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech with Speed Control and Pause</title>
+    <title>Text to Speech with Navigation, Highlighting, and Slider</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,16 +19,22 @@
             width: 80%;
             height: 100px;
         }
-        .speed-control {
+        .speed-control, .controls, .slider-control {
             margin: 20px;
         }
-        .pause-resume-btns {
-            font-size: 20px;
+        .highlight {
+            background-color: yellow;
+        }
+        .text-container {
+            white-space: pre-wrap; /* Preserve whitespace */
+        }
+        .slider {
+            width: 80%;
         }
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Speed Control, Pause, and Resume</h1>
+    <h1>Text to Speech with Speed Control, Pause, Resume, and Navigation</h1>
     
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
@@ -46,25 +52,39 @@
         </select>
     </div>
     
-    <button onclick="speakText()">Speak Text</button>
-    <div class="pause-resume-btns">
+    <button id="start-button" onclick="startSpeech()">START</button>
+    <div class="controls">
+        <button onclick="backward10s()">«10mp</button>
         <button onclick="pauseSpeech()">II</button>
         <button onclick="resumeSpeech()">></button>
+        <button onclick="forward10s()">10mp»</button>
+        <button onclick="stopSpeech()">STOP</button>
     </div>
+    
+    <div class="slider-control">
+        <input type="range" id="time-slider" class="slider" min="0" value="0" step="1" onchange="seekSpeech()" />
+    </div>
+    
+    <div id="text-container" class="text-container"></div>
 
     <script>
         let utteranceQueue = []; // Queue for the utterances
         let isSpeaking = false;  // Flag to check if speech is ongoing
         let sentenceIndex = 0;   // Current sentence index
+        let utterance = null;    // Current utterance
+        let text = '';
+        let totalSentences = 0;
 
-        function speakText() {
-            const text = document.getElementById('text-input').value;
+        function startSpeech() {
+            text = document.getElementById('text-input').value;
             const sentences = text.split(/(?<=[.!?])\s+/); // Split by sentence
-
+            totalSentences = sentences.length;
+            
             // Clear previous utterances
             utteranceQueue = [];
             isSpeaking = false;
             sentenceIndex = 0;
+            document.getElementById('text-container').innerHTML = '';
 
             sentences.forEach(sentence => {
                 const utterance = new SpeechSynthesisUtterance(sentence);
@@ -81,17 +101,24 @@
                 utteranceQueue.push(utterance);
             });
 
+            // Highlight the text
+            highlightText();
+
             // Start speaking
             speakNextSentence();
+            
+            // Update slider max value
+            document.getElementById('time-slider').max = totalSentences - 1;
         }
 
         function speakNextSentence() {
             if (sentenceIndex < utteranceQueue.length) {
-                const utterance = utteranceQueue[sentenceIndex];
+                utterance = utteranceQueue[sentenceIndex];
                 utterance.onend = () => {
                     // Add delay between sentences
                     setTimeout(() => {
                         sentenceIndex++;
+                        highlightText(); // Update highlight
                         speakNextSentence();
                     }, 1500); // Adjust the delay as needed (1500 ms = 1.5 seconds)
                 };
@@ -100,6 +127,14 @@
             } else {
                 isSpeaking = false;
             }
+        }
+
+        function highlightText() {
+            const sentences = text.split(/(?<=[.!?])\s+/); // Split by sentence
+            const highlightedText = sentences.map((sentence, index) => {
+                return index === sentenceIndex ? `<span class="highlight">${sentence}</span>` : sentence;
+            }).join(' ');
+            document.getElementById('text-container').innerHTML = highlightedText;
         }
 
         function pauseSpeech() {
@@ -111,6 +146,42 @@
         function resumeSpeech() {
             if (window.speechSynthesis.paused) {
                 window.speechSynthesis.resume();
+            }
+        }
+
+        function stopSpeech() {
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                sentenceIndex = 0;
+                highlightText();
+                document.getElementById('start-button').textContent = 'START';
+            }
+        }
+
+        function forward10s() {
+            if (sentenceIndex + 1 < utteranceQueue.length) {
+                sentenceIndex++;
+                highlightText();
+                speakNextSentence();
+            }
+        }
+
+        function backward10s() {
+            if (sentenceIndex > 0) {
+                sentenceIndex--;
+                highlightText();
+                speakNextSentence();
+            }
+        }
+
+        function seekSpeech() {
+            const slider = document.getElementById('time-slider');
+            sentenceIndex = parseInt(slider.value);
+            highlightText();
+            if (isSpeaking) {
+                stopSpeech(); // Stop current speech
+                startSpeech(); // Start speech from the new position
             }
         }
     </script>
