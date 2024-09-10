@@ -51,29 +51,39 @@ textarea {
     <button onclick="resumeSpeech()">&#9654;</button> <!-- > szimbólum -->
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
+    <div id="current-word" style="font-size: 40px; margin-top: 20px;"></div>
+
     <script>
         let utterance = null; // Global variable for the SpeechSynthesisUtterance
 
-        function speakText() {
-            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-                window.speechSynthesis.cancel();
-            }
+function speakText() {
+    // Leállítja az esetleg futó beszédet, mielőtt újraindítja
+    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+        window.speechSynthesis.cancel();
+    }
 
-            const text = document.getElementById('text-input').value;
-            utterance = new SpeechSynthesisUtterance(text);
+    const text = document.getElementById('text-input').value;
+    utterance = new SpeechSynthesisUtterance(text);
 
-            // Get selected speech rate from dropdown
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
+    // Get selected speech rate from dropdown
+    const rate = document.getElementById('speed-select').value;
+    utterance.rate = parseFloat(rate);
 
-            // Set voice options (optional)
-            utterance.lang = 'en-US'; // Change as needed
-            utterance.pitch = 1; // Range from 0 to 2
+    // Set voice options (optional)
+    utterance.lang = 'en-US'; // Change as needed
+    utterance.pitch = 1; // Range from 0 to 2
 
-            // Speak the text
-            window.speechSynthesis.speak(utterance);
+    // Eseménykezelő a szavak kiírásához
+    utterance.onboundary = function(event) {
+        if (event.name === 'word') {
+            const spokenWord = text.substring(event.charIndex).split(' ')[0];
+            document.getElementById('current-word').innerText = spokenWord;
         }
+    };
 
+    // Speak the text
+    window.speechSynthesis.speak(utterance);
+}
         function pauseSpeech() {
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.pause();
