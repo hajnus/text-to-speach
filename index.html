@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech</title>
+    <title>Text to Speech with Speed Control</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,18 +19,34 @@
             width: 80%;
             height: 100px;
         }
+        .speed-buttons {
+            margin: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Text to Speech Example</h1>
+    <h1>Text to Speech with Speed Control</h1>
     
     <!-- Textarea for input -->
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
+    
+    <!-- Buttons to set speech rate -->
+    <div class="speed-buttons">
+        <button onclick="setRate(0.5)">Slow</button>
+        <button onclick="setRate(1)">Normal</button>
+        <button onclick="setRate(1.5)">Fast</button>
+    </div>
     
     <!-- Button to generate speech -->
     <button onclick="speakText()">Speak Text</button>
 
     <script>
+        let speechRate = 1; // Default speech rate
+
+        function setRate(rate) {
+            speechRate = rate;
+        }
+
         function speakText() {
             const text = document.getElementById('text-input').value;
             const utterance = new SpeechSynthesisUtterance(text);
@@ -38,7 +54,7 @@
             // Set voice options (optional)
             utterance.lang = 'en-US'; // You can change language or choose different voice
             utterance.pitch = 1; // Range from 0 to 2
-            utterance.rate = 1; // Range from 0.1 to 10
+            utterance.rate = speechRate; // Set the rate based on user selection
             
             // Speak the text
             window.speechSynthesis.speak(utterance);
