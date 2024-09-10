@@ -86,7 +86,7 @@ function speakText() {
             // Kezdi el a beszédet 2 másodperces késéssel
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
-            }, 1000);
+            }, 500);
 
             // Beállítjuk, hogy 2 másodperccel a beszéd befejezése után történjen a következő mondat
             utterance.onend = function() {
@@ -97,7 +97,7 @@ function speakText() {
                     document.getElementById('current-sentence').innerText = nextSentence.trim();
                 }
                 // 2 másodperces késleltetés a következő mondat beszédének kezdete előtt
-                setTimeout(speakNextSentence, 1000);
+                setTimeout(speakNextSentence, 500);
             };
         }
     }
