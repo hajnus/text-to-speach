@@ -53,8 +53,9 @@ textarea {
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
     <script>
-  let utterance = null; // Global variable for the SpeechSynthesisUtterance
-let sentenceStartTime = null; // Az utolsó mondat kezdési időpontja
+let utterance = null; // Global variable for the SpeechSynthesisUtterance
+let sentences = []; // Array to hold sentences
+let currentIndex = 0; // Index for tracking current sentence
 
 function speakText() {
     // Leállítja az esetleg futó beszédet, mielőtt újraindítja
@@ -63,54 +64,61 @@ function speakText() {
     }
 
     const text = document.getElementById('text-input').value;
-    utterance = new SpeechSynthesisUtterance(text);
+    sentences = text.match(/[^.!?]*[.!?]/g) || []; // Mondatok keresése
+    currentIndex = 0;
 
-    // Get selected speech rate from dropdown
-    const rate = document.getElementById('speed-select').value;
-    utterance.rate = parseFloat(rate);
+    function speakNextSentence() {
+        if (currentIndex < sentences.length) {
+            const sentence = sentences[currentIndex];
+            utterance = new SpeechSynthesisUtterance(sentence);
 
-    // Set voice options (optional)
-    utterance.lang = 'en-US'; // Change as needed
-    utterance.pitch = 1; // Range from 0 to 2
+            // Get selected speech rate from dropdown
+            const rate = document.getElementById('speed-select').value;
+            utterance.rate = parseFloat(rate);
 
-    // Eseménykezelő a mondatok kiírásához
-    utterance.onboundary = function(event) {
-        if (event.name === 'sentence') {
-            if (sentenceStartTime) {
-                // Beállítja a kijelzőre a következő mondatot
-                setTimeout(() => {
-                    const sentences = text.match(/[^.!?]*[.!?]/g) || [];
-                    const currentSentence = sentences.shift();
-                    document.getElementById('current-sentence').innerText = currentSentence.trim();
-                    // Új mondat kezdési időpont beállítása
-                    sentenceStartTime = new Date().getTime();
-                }, 1000); // 1 másodperces késleltetés
-            } else {
-                sentenceStartTime = new Date().getTime();
-            }
+            // Set voice options (optional)
+            utterance.lang = 'en-US'; // Change as needed
+            utterance.pitch = 1; // Range from 0 to 2
+
+            // Eseménykezelő a mondatok kiírásához
+            utterance.onstart = function() {
+                document.getElementById('current-sentence').innerText = sentence.trim();
+            };
+
+            utterance.onend = function() {
+                currentIndex++;
+                setTimeout(speakNextSentence, 1000); // 1 másodperces késleltetés a következő mondatra
+            };
+
+            // Új mondat 5 szóval korábban jelenik meg
+            const words = sentence.split(' ');
+            const wordsToDisplay = words.slice(0, Math.max(words.length - 5, 0)).join(' ');
+            document.getElementById('current-sentence').innerText = wordsToDisplay + '...';
+
+            window.speechSynthesis.speak(utterance);
         }
-    };
+    }
 
-    // Speak the text
-    window.speechSynthesis.speak(utterance);
+    speakNextSentence();
 }
 
-        function pauseSpeech() {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.pause();
-            }
-        }
+function pauseSpeech() {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.pause();
+    }
+}
 
-        function resumeSpeech() {
-            if (window.speechSynthesis.paused) {
-                window.speechSynthesis.resume();
-            }
-        }
-        function stopSpeech() {
-            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-                window.speechSynthesis.cancel(); // Leállítja a beszédet
-            }
-        }
+function resumeSpeech() {
+    if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+    }
+}
+
+function stopSpeech() {
+    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+        window.speechSynthesis.cancel(); // Leállítja a beszédet
+    }
+}
     </script>
 </body>
 </html>
