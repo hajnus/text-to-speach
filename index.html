@@ -67,37 +67,39 @@ function speakText() {
     sentences = text.match(/[^.!?]*[.!?]/g) || []; // Mondatok keresése
     currentIndex = 0;
 
-    function speakNextSentence() {
-        if (currentIndex < sentences.length) {
-            const sentence = sentences[currentIndex];
-            utterance = new SpeechSynthesisUtterance(sentence);
+function speakNextSentence() {
+    if (currentIndex < sentences.length) {
+        const sentence = sentences[currentIndex];
+        utterance = new SpeechSynthesisUtterance(sentence);
 
-            // Get selected speech rate from dropdown
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
+        // Get selected speech rate from dropdown
+        const rate = document.getElementById('speed-select').value;
+        utterance.rate = parseFloat(rate);
 
-            // Set voice options (optional)
-            utterance.lang = 'en-US'; // Change as needed
-            utterance.pitch = 1; // Range from 0 to 2
+        // Set voice options (optional)
+        utterance.lang = 'en-US'; // Change as needed
+        utterance.pitch = 1; // Range from 0 to 2
 
-            // Eseménykezelő a mondatok kiírásához
-            utterance.onstart = function() {
-                document.getElementById('current-sentence').innerText = sentence.trim();
-            };
-
-            utterance.onend = function() {
-                currentIndex++;
-                setTimeout(speakNextSentence, 2000); // 2 másodperces késleltetés a következő mondatra
-            };
-
-            // Kezdi el a beszédet 2 másodperces késéssel
+        // Eseménykezelő a mondatok kiírásához
+        utterance.onstart = function() {
+            // A mondat megjelenítése 2 másodperccel a beszéd kezdete előtt
             setTimeout(() => {
-                window.speechSynthesis.speak(utterance);
-            }, 2000);
-        }
-    }
+                document.getElementById('current-sentence').innerText = sentence.trim();
+            }, 2000); // 2 másodperces késleltetés
+        };
 
-    speakNextSentence();
+        utterance.onend = function() {
+            currentIndex++;
+            // 2 másodperces késleltetés a következő mondat előtt
+            setTimeout(speakNextSentence, 2000);
+        };
+
+        // Kezdi el a beszédet 2 másodperces késéssel
+        setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+        }, 2000);
+    }
+}    speakNextSentence();
 }
 
 function pauseSpeech() {
