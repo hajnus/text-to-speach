@@ -15,33 +15,15 @@
             height: 40px; /* Gomb magassága */
             border-radius: 5px;
             border: 2px solid #000;
+            background-color: #fff;
+            color: #000;
             cursor: pointer;
             font-size: 16px;
             margin: 5px;
         }
-        button#start-btn {
-            background-color: lightcyan; /* Alap háttérszín */
-            color: white; /* Betűszín */
-        }
-        button#start-btn.active {
-            background-color: #000; /* Aktív háttérszín */
-            color: #fff; /* Aktív betűszín */
-        }
-        button#stop-btn {
-            background-color: lightcyan; /* Alap háttérszín */
-            color: white; /* Betűszín */
-        }
-        button#stop-btn.active {
-            background-color: #000; /* Aktív háttérszín */
-            color: #fff; /* Aktív betűszín */
-        }
         button.active {
             background-color: #000;
             color: #fff;
-        }
-        button.inactive {
-            background-color: #fff;
-            color: #000;
         }
         .text-input-container {
             display: flex;
@@ -69,6 +51,21 @@
             margin-left: -30px; /* A gomb közel kerül a szövegdobozhoz */
             padding: 0;
             line-height: 1;
+        }
+        button#start-btn {
+            background-color: lightcyan; /* Alap háttérszín */
+            color: white; /* Betűszín */
+            border: 2px solid #000; /* Gomb körvonalának színe */
+            width: 100px; /* Gomb szélessége */
+            height: 40px; /* Gomb magassága */
+            border-radius: 5px; /* Gomb sarkainak lekerekítése */
+            cursor: pointer; /* Kézkurzor a gomb fölött */
+            font-size: 16px; /* Betűméret */
+            margin: 5px; /* Gombok közötti távolság */
+        }
+        button#start-btn.active {
+            background-color: #000; /* Aktív gomb háttérszín */
+            color: #fff; /* Aktív gomb betűszín */
         }
         .speed-control {
             margin: 20px;
@@ -106,13 +103,13 @@
     <div class="speed-control">
         <label for="speed-select">Select Speed:</label>
         <select id="speed-select">
-            <option value="0.2">0.2x</option>
-            <option value="0.4">0.4x</option>
-            <option value="0.6" selected>0.6x</option>
-            <option value="0.8">0.8x</option>
-            <option value="1">1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
+            <option value="0.2">0.5x</option>
+            <option value="0.4">0.75x</option>
+            <option value="0.6" selected>1x</option>
+            <option value="0.8">1.25x</option>
+            <option value="1">1.5x</option>
+            <option value="1.25">1.75x</option>
+            <option value="1.5">2x</option>
         </select>
     </div>
 
@@ -122,11 +119,15 @@
     </div>
 
     <div class="button-container">
-        <button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;</button>
-        <button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>
+        <button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;
+            <span> </span>
+        </button>
+        <button id="resume-btn" onclick="resumeSpeech()">&#9654;
+            <span> </span>
+        </button>
     </div>
 
-    <button id="stop-btn" onclick="stopSpeech()">■</button> <!-- Stop gomb -->
+    <button onclick="stopSpeech()">■</button> <!-- Stop gomb -->
     <span> </span>
     
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
@@ -143,11 +144,9 @@
             const buttons = document.querySelectorAll('button');
             buttons.forEach(button => {
                 button.classList.remove('active');
-                button.classList.add('inactive');
             });
             if (buttonId) {
                 document.getElementById(buttonId).classList.add('active');
-                document.getElementById(buttonId).classList.remove('inactive');
             }
         }
 
@@ -205,7 +204,6 @@
                 isSpeaking = false;
                 isPaused = true;
                 changeButtonState('pause-btn'); // Aktív gomb
-                changeButtonState('stop-btn'); // Stop gomb deaktiválása
             }
         }
 
@@ -220,7 +218,6 @@
                     isSpeaking = true;
                     isPaused = false;
                     changeButtonState('resume-btn'); // Aktív gomb
-                    changeButtonState('stop-btn'); // Stop gomb deaktiválása
                 }
             }
         }
@@ -231,7 +228,6 @@
                 isSpeaking = false;
                 isPaused = false;
                 changeButtonState(''); // Minden gomb deaktiválása
-                changeButtonState('stop-btn'); // Stop gomb aktiválása
             }
         }
 
