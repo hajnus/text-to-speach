@@ -28,8 +28,8 @@
 .text-input-container {
     display: flex;
     align-items: center;
-    width: 100%;
-    position: relative;
+    width: 85%; /* A teljes szélesség 85%-a */
+    margin: 0 auto; /* Középre igazítás */
 }
 
 textarea {
@@ -167,21 +167,24 @@ function startSpeech() {
     function speakNextSentence() {
         if (currentIndex < sentences.length) {
             const sentence = sentences[currentIndex];
-            utterance = new SpeechSynthesisUtterance(sentence);
-
-            const rate = document.getElementById('speed-select').value;
-            utterance.rate = parseFloat(rate);
-            utterance.lang = 'en-US';
-            utterance.pitch = 1;
-
             document.getElementById('current-sentence').innerText = sentence.trim();
 
-            window.speechSynthesis.speak(utterance);
+            // 0.2 mp várakozás előtt kezdje el a felolvasást
+            setTimeout(() => {
+                utterance = new SpeechSynthesisUtterance(sentence);
 
-            utterance.onend = function() {
-                currentIndex++;
-                setTimeout(speakNextSentence, 200);
-            };
+                const rate = document.getElementById('speed-select').value;
+                utterance.rate = parseFloat(rate);
+                utterance.lang = 'en-US';
+                utterance.pitch = 1;
+
+                window.speechSynthesis.speak(utterance);
+
+                utterance.onend = function() {
+                    currentIndex++;
+                    setTimeout(speakNextSentence, 200);
+                };
+            }, 200); // 0.2 mp várakozás
         } else {
             isSpeaking = false;
             changeButtonState(''); // Gomb állapot visszaállítása
