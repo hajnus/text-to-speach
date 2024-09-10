@@ -10,7 +10,7 @@
             text-align: center;
             margin: 20px;
         }
-        button {
+        button, select {
             padding: 10px 20px;
             font-size: 16px;
             margin: 10px;
@@ -19,7 +19,7 @@
             width: 80%;
             height: 100px;
         }
-        .speed-buttons {
+        .speed-control {
             margin: 20px;
         }
     </style>
@@ -27,34 +27,36 @@
 <body>
     <h1>Text to Speech with Speed Control</h1>
     
-    <!-- Textarea for input -->
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
-    <!-- Buttons to set speech rate -->
-    <div class="speed-buttons">
-        <button onclick="setRate(0.5)">Slow</button>
-        <button onclick="setRate(1)">Normal</button>
-        <button onclick="setRate(1.5)">Fast</button>
+    <!-- Speed control dropdown -->
+    <div class="speed-control">
+        <label for="speed-select">Select Speed:</label>
+        <select id="speed-select">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2x</option>
+        </select>
     </div>
     
-    <!-- Button to generate speech -->
     <button onclick="speakText()">Speak Text</button>
 
     <script>
-        let speechRate = 1; // Default speech rate
-
-        function setRate(rate) {
-            speechRate = rate;
-        }
-
         function speakText() {
             const text = document.getElementById('text-input').value;
             const utterance = new SpeechSynthesisUtterance(text);
             
+            // Get selected speech rate from dropdown
+            const rate = document.getElementById('speed-select').value;
+            utterance.rate = parseFloat(rate);
+            
             // Set voice options (optional)
-            utterance.lang = 'en-US'; // You can change language or choose different voice
+            utterance.lang = 'en-US'; // Change as needed
             utterance.pitch = 1; // Range from 0 to 2
-            utterance.rate = speechRate; // Set the rate based on user selection
             
             // Speak the text
             window.speechSynthesis.speak(utterance);
