@@ -25,51 +25,48 @@
             background-color: #000;
             color: #fff;
         }
-.text-input-container {
-    display: flex;
-    align-items: center;
-    width: 85%; /* A teljes szélesség 85%-a */
-    margin: 0 auto; /* Középre igazítás */
-}
-
-textarea {
-    width: calc(100% - 50px); /* Teljes szélesség minusz a clear gomb szélessége */
-    height: 100px;
-    border-radius: 15px;
-    background-color: lightgrey;
-    padding: 10px;
-    box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
-}
-
-button#clear-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #000;
-    background-color: #fff;
-    color: #000;
-    cursor: pointer;
-    font-size: 20px;
-    margin-left: -30px; /* A gomb közel kerül a szövegdobozhoz */
-    padding: 0;
-    line-height: 1;
-}
-button#start-btn {
-    background-color: lightcyan; /* Alap háttérszín */
-    color: white; /* Betűszín */
-    border: 2px solid #000; /* Gomb körvonalának színe */
-    width: 100px; /* Gomb szélessége */
-    height: 40px; /* Gomb magassága */
-    border-radius: 5px; /* Gomb sarkainak lekerekítése */
-    cursor: pointer; /* Kézkurzor a gomb fölött */
-    font-size: 16px; /* Betűméret */
-    margin: 5px; /* Gombok közötti távolság */
-}
-
-button#start-btn.active {
-    background-color: #000; /* Aktív gomb háttérszín */
-    color: #fff; /* Aktív gomb betűszín */
-}
+        .text-input-container {
+            display: flex;
+            align-items: center;
+            width: 85%; /* A teljes szélesség 85%-a */
+            margin: 0 auto; /* Középre igazítás */
+        }
+        textarea {
+            width: calc(100% - 50px); /* Teljes szélesség minusz a clear gomb szélessége */
+            height: 100px;
+            border-radius: 15px;
+            background-color: lightgrey;
+            padding: 10px;
+            box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
+        }
+        button#clear-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            background-color: #fff;
+            color: #000;
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: -30px; /* A gomb közel kerül a szövegdobozhoz */
+            padding: 0;
+            line-height: 1;
+        }
+        button#start-btn {
+            background-color: lightcyan; /* Alap háttérszín */
+            color: white; /* Betűszín */
+            border: 2px solid #000; /* Gomb körvonalának színe */
+            width: 100px; /* Gomb szélessége */
+            height: 40px; /* Gomb magassága */
+            border-radius: 5px; /* Gomb sarkainak lekerekítése */
+            cursor: pointer; /* Kézkurzor a gomb fölött */
+            font-size: 16px; /* Betűméret */
+            margin: 5px; /* Gombok közötti távolság */
+        }
+        button#start-btn.active {
+            background-color: #000; /* Aktív gomb háttérszín */
+            color: #fff; /* Aktív gomb betűszín */
+        }
         .speed-control {
             margin: 20px;
         }
@@ -87,22 +84,20 @@ button#start-btn.active {
             transform: translateX(-50%);
             margin-top: 5px;
         }
-.text-input-container {
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
-}
-
-        
+        .text-input-container {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
+        }
     </style>
 </head>
 <body>
     <h1>Text to Speech with Speed Control and Pause</h1>
     
-<div class="text-input-container">
-    <textarea id="text-input" placeholder="Enter text here..."></textarea>
-    <button id="clear-btn" onclick="document.getElementById('text-input').value=''">×</button>
-</div>
+    <div class="text-input-container">
+        <textarea id="text-input" placeholder="Enter text here..."></textarea>
+        <button id="clear-btn" onclick="document.getElementById('text-input').value=''">×</button>
+    </div>
     
     <!-- Speed control dropdown -->
     <div class="speed-control">
@@ -135,7 +130,6 @@ button#start-btn.active {
     <button onclick="stopSpeech()">■</button> <!-- Stop gomb -->
     <span> </span>
     
-
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
 
     <script>
@@ -156,52 +150,53 @@ button#start-btn.active {
             }
         }
 
-function startSpeech() {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-    }
+        function startSpeech() {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+            }
 
-    const text = document.getElementById('text-input').value;
-    if (!text.trim()) {
-        return;
-    }
+            const text = document.getElementById('text-input').value;
+            if (!text.trim()) {
+                return;
+            }
 
-    sentences = text.match(/[^.!?]*[.!?]/g) || [];
-    currentIndex = 0;
-    isSpeaking = true;
-    isPaused = false;
+            sentences = text.match(/[^.!?]*[.!?]/g) || [];
+            currentIndex = 0;
+            isSpeaking = true;
+            isPaused = false;
 
-    changeButtonState('start-btn'); // Aktív gomb
+            changeButtonState('start-btn'); // Aktív gomb
 
-    function speakNextSentence() {
-        if (currentIndex < sentences.length) {
-            const sentence = sentences[currentIndex];
-            document.getElementById('current-sentence').innerText = sentence.trim();
+            function speakNextSentence() {
+                if (currentIndex < sentences.length) {
+                    const sentence = sentences[currentIndex];
+                    document.getElementById('current-sentence').innerText = sentence.trim();
 
-            // 0.2 mp várakozás előtt kezdje el a felolvasást
-            setTimeout(() => {
-                utterance = new SpeechSynthesisUtterance(sentence);
+                    // 0.2 mp várakozás előtt kezdje el a felolvasást
+                    setTimeout(() => {
+                        utterance = new SpeechSynthesisUtterance(sentence);
 
-                const rate = document.getElementById('speed-select').value;
-                utterance.rate = parseFloat(rate);
-                utterance.lang = 'en-US';
-                utterance.pitch = 1;
+                        const rate = document.getElementById('speed-select').value;
+                        utterance.rate = parseFloat(rate);
+                        utterance.lang = 'en-US';
+                        utterance.pitch = 1;
 
-                window.speechSynthesis.speak(utterance);
+                        window.speechSynthesis.speak(utterance);
 
-                utterance.onend = function() {
-                    currentIndex++;
-                    setTimeout(speakNextSentence, 200);
-                };
-            }, 200); // 0.2 mp várakozás
-        } else {
-            isSpeaking = false;
-            changeButtonState(''); // Gomb állapot visszaállítása
+                        utterance.onend = function() {
+                            currentIndex++;
+                            setTimeout(speakNextSentence, 200);
+                        };
+                    }, 200); // 0.2 mp várakozás
+                } else {
+                    isSpeaking = false;
+                    changeButtonState(''); // Gomb állapot visszaállítása
+                }
+            }
+
+            speakNextSentence();
         }
-    }
 
-    speakNextSentence();
-}
         function pauseSpeech() {
             if (window.speechSynthesis.speaking) {
                 // Pause the speech
@@ -213,19 +208,16 @@ function startSpeech() {
         }
 
         function resumeSpeech() {
-    if (isPaused) {
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-            // Start speech from beginning if speech is not active
-            startSpeech();
-        } else if (window.speechSynthesis.paused) {
-            // Resume the speech if it is paused
-            window.speechSynthesis.resume();
-            isSpeaking = true;
-            isPaused = false;
-            changeButtonState('resume-btn'); // Aktív gomb
-        }
-    }
-}
+            if (isPaused) {
+                if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                    // Start speech from beginning if speech is not active
+                    startSpeech();
+                } else if (window.speechSynthesis.paused) {
+                    // Resume the speech if it is paused
+                    window.speechSynthesis.resume();
+                    isSpeaking = true;
+                    isPaused = false;
+                    changeButtonState('resume-btn'); // Aktív gomb
                 }
             }
         }
@@ -242,7 +234,7 @@ function startSpeech() {
         // Load placeholder text if available
         document.getElementById('text-input').value = localStorage.getItem('textInput') || '';
 
-        // Set Skip to Start button as active initially
+        // Set Start button as active initially
         changeButtonState('start-btn');
 
         // Save text to localStorage on page unload
