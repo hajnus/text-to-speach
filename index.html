@@ -5,91 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to Speech with Speed Control and Pause</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        button {
-            width: 100px; /* Gomb szélessége */
-            height: 40px; /* Gomb magassága */
-            border-radius: 5px;
-            border: 2px solid #000;
-            background-color: #fff;
-            color: #000;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-        button.active {
-            background-color: #000;
-            color: #fff;
-        }
-        .text-input-container {
-            display: flex;
-            align-items: center;
-            width: 85%; /* A teljes szélesség 85%-a */
-            margin: 0 auto; /* Középre igazítás */
-        }
-        textarea {
-            width: calc(100% - 50px); /* Teljes szélesség minusz a clear gomb szélessége */
-            height: 100px;
-            border-radius: 15px;
-            background-color: lightgrey;
-            padding: 10px;
-            box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
-        }
-        button#clear-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #000;
-            background-color: #fff;
-            color: #000;
-            cursor: pointer;
-            font-size: 20px;
-            margin-left: -30px; /* A gomb közel kerül a szövegdobozhoz */
-            padding: 0;
-            line-height: 1;
-        }
-        button#start-btn {
-            background-color: lightcyan; /* Alap háttérszín */
-            color: white; /* Betűszín */
-            border: 2px solid #000; /* Gomb körvonalának színe */
-            width: 100px; /* Gomb szélessége */
-            height: 40px; /* Gomb magassága */
-            border-radius: 5px; /* Gomb sarkainak lekerekítése */
-            cursor: pointer; /* Kézkurzor a gomb fölött */
-            font-size: 16px; /* Betűméret */
-            margin: 5px; /* Gombok közötti távolság */
-        }
-        button#start-btn.active {
-            background-color: #000; /* Aktív gomb háttérszín */
-            color: #fff; /* Aktív gomb betűszín */
-        }
-        .speed-control {
-            margin: 20px;
-        }
-        .button-container {
-            display: inline-block;
-            text-align: center;
-            position: relative;
-        }
-        .button-container span {
-            display: block;
-            font-size: smaller;
-            position: absolute;
-            bottom: -30px; /* A gomb alatt, állítsd be az igényed szerint */
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 5px;
-        }
-        .text-input-container {
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
-        }
-    </style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+    }
+    button {
+        width: 100px; /* Gomb szélessége */
+        height: 40px; /* Gomb magassága */
+        border-radius: 5px;
+        border: 2px solid #000;
+        background-color: #fff;
+        color: #000;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 5px;
+    }
+    button.active {
+        background-color: #000;
+        color: #fff;
+    }
+    textarea {
+        width: 85%; /* A szövegdoboz szélessége */
+        height: 100px;
+        border-radius: 15px;
+        background-color: lightgrey;
+        padding: 10px;
+        box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
+    }
+    button#clear-btn {
+        width: 40px; /* Gomb szélessége */
+        height: 40px; /* Gomb magassága */
+        border-radius: 50%; /* Kerek gomb */
+        border: 2px solid #000;
+        background-color: #fff;
+        color: #000;
+        cursor: pointer;
+        font-size: 20px;
+        margin-left: -30px; /* Közel helyezkedik el a szövegdobozhoz */
+        padding: 0;
+        line-height: 1;
+    }
+    .speed-control {
+        margin: 20px;
+    }
+    .button-container {
+        display: inline-block;
+        text-align: center;
+        position: relative;
+    }
+    .button-container span {
+        display: block;
+        font-size: smaller;
+        position: absolute;
+        bottom: -30px; /* A gomb alatt, állítsd be az igényed szerint */
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 5px;
+    }
+    .text-input-container {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
+    }
+
+    /* Stop gomb stílusok */
+    button#stop-btn {
+        background-color: cyan; /* Alap háttérszín */
+        color: white; /* Betűszín */
+    }
+    button#stop-btn.active {
+        background-color: black; /* Aktív háttérszín */
+        color: white; /* Aktív betűszín */
+    }
+    button#stop-btn.inactive {
+        background-color: white; /* Inaktív háttérszín, ha másik gomb aktiválva van */
+        color: black; /* Inaktív betűszín, ha másik gomb aktiválva van */
+    }
+</style>
 </head>
 <body>
     <h1>Text to Speech with Speed Control and Pause</h1>
@@ -141,14 +134,17 @@
 
         // Function to set button states
         function changeButtonState(buttonId) {
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.classList.remove('active');
-            });
-            if (buttonId) {
-                document.getElementById(buttonId).classList.add('active');
-            }
-        }
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.classList.remove('active');
+        button.classList.add('inactive');
+    });
+    if (buttonId) {
+        document.getElementById(buttonId).classList.add('active');
+        document.getElementById(buttonId).classList.remove('inactive');
+    }
+}
+
 
         function startSpeech() {
             if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
