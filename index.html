@@ -70,7 +70,7 @@ button#clear-btn {
     margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
 }
 
-        }
+        
     </style>
 </head>
 <body>
@@ -134,21 +134,19 @@ button#clear-btn {
         }
 
 function startSpeech() {
-    // Leállítja az esetleg futó beszédet, mielőtt újraindítja
     if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
         window.speechSynthesis.cancel();
     }
 
     const text = document.getElementById('text-input').value;
     if (!text.trim()) {
-        // Ha nincs szöveg, ne folytassa
         return;
     }
 
     sentences = text.match(/[^.!?]*[.!?]/g) || [];
     currentIndex = 0;
     isSpeaking = true;
-    isPaused = false; // Reset pause state
+    isPaused = false;
 
     changeButtonState('start-btn'); // Aktív gomb
 
@@ -164,14 +162,14 @@ function startSpeech() {
 
             document.getElementById('current-sentence').innerText = sentence.trim();
 
-            window.speechSynthesis.speak(utterance); // Elindítja a beszédet
+            window.speechSynthesis.speak(utterance);
 
             utterance.onend = function() {
                 currentIndex++;
                 setTimeout(speakNextSentence, 200);
             };
         } else {
-            isSpeaking = false; // Speech finished
+            isSpeaking = false;
             changeButtonState(''); // Gomb állapot visszaállítása
         }
     }
