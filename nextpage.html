@@ -194,6 +194,17 @@
                 changeButtonState(''); // Minden gomb deaktiválása
             }
         }
+
+        // Load placeholder text if available
+        document.getElementById('text-input').value = localStorage.getItem('text') || '';
+
+        // Save text to localStorage
+        document.getElementById('text-input').addEventListener('input', function() {
+            localStorage.setItem('text', this.value);
+        });
+        
+        // Set initial button state
+        changeButtonState('resume-btn');
     </script>
 </body>
 </html>
