@@ -33,35 +33,40 @@
     <div class="speed-control">
         <label for="speed-select">Select Speed:</label>
         <select id="speed-select">
-            <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1" selected>1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2x</option>
+            <option value="0.2">0.5x</option>
+            <option value="0.4">0.75x</option>
+            <option value="0.6" selected>1x</option>
+            <option value="0.8">1.25x</option>
+            <option value="1">1.5x</option>
+            <option value="1.25">1.75x</option>
+            <option value="1.5">2x</option>
         </select>
     </div>
     
-    <button onclick="speakText()">Speak Text</button>
-    <button onclick="pauseSpeech()">Pause</button>
-    <button onclick="resumeSpeech()">Resume</button>
+    <button onclick="speakText()">Speak Text from Start</button>
+    <button onclick="pauseSpeech()">&#10074;&#10074;</button> <!-- II szimbólum -->
+    <button onclick="resumeSpeech()">&#9654;</button> <!-- > szimbólum -->
+    <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
     <script>
         let utterance = null; // Global variable for the SpeechSynthesisUtterance
 
         function speakText() {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel();
+            }
+
             const text = document.getElementById('text-input').value;
             utterance = new SpeechSynthesisUtterance(text);
-            
+
             // Get selected speech rate from dropdown
             const rate = document.getElementById('speed-select').value;
             utterance.rate = parseFloat(rate);
-            
+
             // Set voice options (optional)
             utterance.lang = 'en-US'; // Change as needed
             utterance.pitch = 1; // Range from 0 to 2
-            
+
             // Speak the text
             window.speechSynthesis.speak(utterance);
         }
@@ -75,6 +80,11 @@
         function resumeSpeech() {
             if (window.speechSynthesis.paused) {
                 window.speechSynthesis.resume();
+            }
+        }
+        function stopSpeech() {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+                window.speechSynthesis.cancel(); // Leállítja a beszédet
             }
         }
     </script>
