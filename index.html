@@ -11,7 +11,7 @@
             margin: 20px;
         }
 button {
-    width: 40px; /* Gomb szélessége */
+    width: 100px; /* Gomb szélessége */
 }.button-container {
     display: inline-block;
     text-align: center;
@@ -142,11 +142,11 @@ function startSpeech() {
 
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
-            }, 2000);
+            }, 200);
 
             utterance.onend = function() {
                 currentIndex++;
-                setTimeout(speakNextSentence, 2000);
+                setTimeout(speakNextSentence, 200);
             };
         } else {
             isSpeaking = false; // Speech finished
