@@ -10,7 +10,9 @@
             text-align: center;
             margin: 20px;
         }
-.button-container {
+button {
+    width: 40px; /* Gomb szélessége */
+}.button-container {
     display: inline-block;
     text-align: center;
     position: relative; /* Fontos, hogy a span-t a button alá helyezzük */
@@ -88,8 +90,6 @@ button.active {
             <span>STOP</span>
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
-
- <button id="myButton" onclick="changeColor()">Click Me</button>
 
     <script>
 let utterance = null; // Global variable for the SpeechSynthesisUtterance
