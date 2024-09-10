@@ -45,9 +45,9 @@
         </select>
     </div>
     
-    <button onclick="speakText()">Speak Text from Start</button>
-    <button onclick="pauseSpeech()">&#10074;&#10074;</button> <!-- II szimbólum -->
-    <button onclick="resumeSpeech()">&#9654;</button> <!-- > szimbólum -->
+<button id="start-btn" onclick="startSpeech()">Speak Text from Start</button>
+<button id="pause-btn" onclick="pauseSpeech()">&#10074;&#10074;</button>
+<button id="resume-btn" onclick="resumeSpeech()">&#9654;</button>    
     <button onclick="stopSpeech()">Stop</button> <!-- Stop gomb -->
 
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
@@ -56,69 +56,77 @@
 let utterance = null; // Global variable for the SpeechSynthesisUtterance
 let sentences = []; // Array to hold sentences
 let currentIndex = 0; // Index for tracking current sentence
+let isSpeaking = false; // Track if speech is currently active
+let isPaused = false; // Track if speech is paused
 
-function speakText() {
+function startSpeech() {
     // Leállítja az esetleg futó beszédet, mielőtt újraindítja
     if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
         window.speechSynthesis.cancel();
     }
 
     const text = document.getElementById('text-input').value;
-    sentences = text.match(/[^.!?]*[.!?]/g) || []; // Mondatok keresése
+    sentences = text.match(/[^.!?]*[.!?]/g) || [];
     currentIndex = 0;
+    isSpeaking = true;
+    isPaused = false; // Reset pause state
 
     function speakNextSentence() {
         if (currentIndex < sentences.length) {
             const sentence = sentences[currentIndex];
             utterance = new SpeechSynthesisUtterance(sentence);
 
-            // Get selected speech rate from dropdown
             const rate = document.getElementById('speed-select').value;
             utterance.rate = parseFloat(rate);
+            utterance.lang = 'en-US';
+            utterance.pitch = 1;
 
-            // Set voice options (optional)
-            utterance.lang = 'en-US'; // Change as needed
-            utterance.pitch = 1; // Range from 0 to 2
-
-            // A mondat azonnali megjelenítése
             document.getElementById('current-sentence').innerText = sentence.trim();
 
-            // Kezdi el a beszédet 2 másodperces késéssel
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
-            }, 500);
+            }, 2000);
 
-            // Beállítjuk, hogy 2 másodperccel a beszéd befejezése után történjen a következő mondat
             utterance.onend = function() {
                 currentIndex++;
-                // Azonnali kiírás a következő mondatra
-                if (currentIndex < sentences.length) {
-                    const nextSentence = sentences[currentIndex];
-                    document.getElementById('current-sentence').innerText = nextSentence.trim();
-                }
-                // 2 másodperces késleltetés a következő mondat beszédének kezdete előtt
-                setTimeout(speakNextSentence, 500);
+                setTimeout(speakNextSentence, 2000);
             };
+        } else {
+            isSpeaking = false; // Speech finished
         }
     }
+
     speakNextSentence();
 }
 
 function pauseSpeech() {
     if (window.speechSynthesis.speaking) {
+        // Pause the speech
         window.speechSynthesis.pause();
+        isSpeaking = false;
+        isPaused = true;
     }
 }
 
 function resumeSpeech() {
-    if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
+    if (isPaused) {
+        if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+            // Start speech from beginning if speech is not active
+            startSpeech();
+        } else if (window.speechSynthesis.paused) {
+            // Resume the speech if it is paused
+            window.speechSynthesis.resume();
+            isSpeaking = true;
+            isPaused = false;
+        }
     }
 }
 
 function stopSpeech() {
     if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel(); // Leállítja a beszédet
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        isPaused = false;
     }
 }
     </script>
