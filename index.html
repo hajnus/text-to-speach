@@ -86,6 +86,11 @@
             }
 
             const text = document.getElementById('text-input').value;
+            if (!text.trim()) {
+                // Ha nincs szöveg, ne folytassa
+                return;
+            }
+
             sentences = text.match(/[^.!?]*[.!?]/g) || [];
             currentIndex = 0;
             isSpeaking = true;
