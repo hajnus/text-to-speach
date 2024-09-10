@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text to Speech with Navigation and Word Highlighting</title>
+    <title>Text to Speech with Speed Control and Pause</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,35 +14,18 @@
             padding: 10px 20px;
             font-size: 16px;
             margin: 10px;
-            border-radius: 10px;
         }
         textarea {
             width: 80%;
             height: 100px;
         }
-        .speed-control, .controls, .slider-control {
+        .speed-control {
             margin: 20px;
-        }
-        .highlight-word {
-            background-color: yellow;
-        }
-        .text-container {
-            white-space: pre-wrap;
-            text-align: left;
-            width: 80%;
-            margin: auto;
-        }
-        .slider {
-            width: 95%; /* Almost full screen width */
-        }
-        .inactive {
-            opacity: 0.5;
-            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <h1>Text to Speech with Word Highlighting and Navigation</h1>
+    <h1>Text to Speech with Speed Control and Pause</h1>
     
     <textarea id="text-input" placeholder="Enter text here..."></textarea><br>
     
@@ -60,95 +43,31 @@
         </select>
     </div>
     
-    <button id="start-button" onclick="startSpeech()">START</button>
-    <div class="controls">
-        <button id="back-button" class="inactive" onclick="backward()">BACK</button>
-        <button onclick="pauseSpeech()">II</button>
-        <button onclick="resumeSpeech()">></button>
-        <button id="skip-button" class="inactive" onclick="skip()">SKIP</button>
-        <button onclick="stopSpeech()">STOP</button>
-    </div>
-    
-    <div class="slider-control">
-        <input type="range" id="time-slider" class="slider" min="0" value="0" step="1" onchange="seekSpeech()" />
-    </div>
-    
-    <div id="text-container" class="text-container"></div>
+    <button onclick="speakText()">Speak Text</button>
+    <button onclick="pauseSpeech()">Pause</button>
+    <button onclick="resumeSpeech()">Resume</button>
 
     <script>
-        let utteranceQueue = [];
-        let isSpeaking = false;
-        let wordIndex = 0;
-        let text = '';
-        let words = [];
-        let currentUtterance = null;
-        let characterLength = 0;
+        let utterance = null; // Global variable for the SpeechSynthesisUtterance
 
-        function startSpeech() {
-            text = document.getElementById('text-input').value;
-            words = text.match(/\b\w+('|’)?\w*\b/g) || [];
-            characterLength = text.length;
-
-            utteranceQueue = [];
-            isSpeaking = false;
-            wordIndex = 0;
-            document.getElementById('text-container').innerHTML = '';
-
-            words.forEach((word, index) => {
-                const utterance = new SpeechSynthesisUtterance(word);
-                const rate = document.getElementById('speed-select').value;
-                utterance.rate = parseFloat(rate);
-                utterance.lang = 'en-US';
-                utterance.pitch = 1;
-                
-                utterance.onboundary = (event) => {
-                    if (event.name === 'word') {
-                        updateSlider();
-                    }
-                };
-
-                utteranceQueue.push(utterance);
-            });
-
-            speakNextWord();
-            document.getElementById('time-slider').max = characterLength;
-        }
-
-        function speakNextWord() {
-            if (wordIndex < utteranceQueue.length) {
-                const utterance = utteranceQueue[wordIndex];
-                utterance.onend = () => {
-                    wordIndex++;
-                    if (wordIndex < utteranceQueue.length) {
-                        speakNextWord();
-                    } else {
-                        isSpeaking = false;
-                    }
-                };
-                if (!isSpeaking) {
-                    window.speechSynthesis.speak(utterance);
-                    isSpeaking = true;
-                }
-            }
-        }
-
-        function updateSlider() {
-            const slider = document.getElementById('time-slider');
-            slider.value = wordIndex;
-            highlightText();
-        }
-
-        function highlightText() {
-            const highlightedText = words.map((word, index) => {
-                return index === wordIndex ? 
-                    `<span class="highlight-word">${word}</span>` : 
-                    word;
-            }).join(' ');
-            document.getElementById('text-container').innerHTML = highlightedText;
+        function speakText() {
+            const text = document.getElementById('text-input').value;
+            utterance = new SpeechSynthesisUtterance(text);
+            
+            // Get selected speech rate from dropdown
+            const rate = document.getElementById('speed-select').value;
+            utterance.rate = parseFloat(rate);
+            
+            // Set voice options (optional)
+            utterance.lang = 'en-US'; // Change as needed
+            utterance.pitch = 1; // Range from 0 to 2
+            
+            // Speak the text
+            window.speechSynthesis.speak(utterance);
         }
 
         function pauseSpeech() {
-            if (isSpeaking) {
+            if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.pause();
             }
         }
@@ -157,32 +76,6 @@
             if (window.speechSynthesis.paused) {
                 window.speechSynthesis.resume();
             }
-        }
-
-        function stopSpeech() {
-            if (isSpeaking) {
-                window.speechSynthesis.cancel();
-                isSpeaking = false;
-                wordIndex = 0;
-                highlightText();
-                document.getElementById('start-button').textContent = 'START';
-            }
-        }
-
-        function skip() {
-            // Skip functionality will be inactive for now
-        }
-
-        function backward() {
-            // Backward functionality will be inactive for now
-        }
-
-        function seekSpeech() {
-            const slider = document.getElementById('time-slider');
-            wordIndex = Math.round(slider.value);
-            highlightText();
-            stopSpeech();
-            speakNextWord();
         }
     </script>
 </body>
