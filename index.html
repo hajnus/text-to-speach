@@ -55,11 +55,20 @@ button#clear-btn {
     line-height: 1;
 }
 button#start-btn {
-    background-color: lightcyan; /* Alapértelmezett szín */
+    background-color: lightcyan; /* Alap háttérszín */
+    color: white; /* Betűszín */
+    border: 2px solid #000; /* Gomb körvonalának színe */
+    width: 100px; /* Gomb szélessége */
+    height: 40px; /* Gomb magassága */
+    border-radius: 5px; /* Gomb sarkainak lekerekítése */
+    cursor: pointer; /* Kézkurzor a gomb fölött */
+    font-size: 16px; /* Betűméret */
+    margin: 5px; /* Gombok közötti távolság */
 }
+
 button#start-btn.active {
-    background-color: #000;
-    color: #fff;
+    background-color: #000; /* Aktív gomb háttérszín */
+    color: #fff; /* Aktív gomb betűszín */
 }
         .speed-control {
             margin: 20px;
