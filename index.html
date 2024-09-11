@@ -73,6 +73,10 @@
         margin-bottom: 10px; /* Távolság az alatta lévő elemekhez */
     }
 
+    /* Stop gomb stílusok eltávolítva */
+    button#stop-btn {
+        display: none; /* Elrejtjük a stop gombot */
+    }
 </style>
 </head>
 <body>
@@ -119,133 +123,131 @@
         </button>
     </div>
 
-    <button id="stop-btn" onclick="stopSpeech()">■</button> <!-- Stop gomb -->
-    <span> </span>
+    <!-- Stop button removed -->
     
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
 
 <script>
-let utterance = null; // Global variable for the SpeechSynthesisUtterance
-let sentences = []; // Array to hold sentences
-let currentIndex = 0; // Index for tracking current sentence
-let isSpeaking = false; // Track if speech is currently active
-let isPaused = false; // Track if speech is paused
+    let utterance = null; // Global variable for the SpeechSynthesisUtterance
+    let sentences = []; // Array to hold sentences
+    let currentIndex = 0; // Index for tracking current sentence
+    let isSpeaking = false; // Track if speech is currently active
+    let isPaused = false; // Track if speech is paused
 
-function changeButtonState(buttonId) {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-        button.classList.add('inactive');
-    });
-    if (buttonId) {
-        document.getElementById(buttonId).classList.add('active');
-        document.getElementById(buttonId).classList.remove('inactive');
-    }
-}
-
-function startSpeech() {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-    }
-
-    const text = document.getElementById('text-input').value;
-    if (!text.trim()) {
-        return;
-    }
-
-    sentences = text.match(/[^.!?]*[.!?]/g) || [];
-    currentIndex = 0;
-    isSpeaking = true;
-    isPaused = false;
-
-    changeButtonState('start-btn'); // Aktív gomb
-
-    function speakNextSentence() {
-        if (currentIndex < sentences.length) {
-            const sentence = sentences[currentIndex];
-            document.getElementById('current-sentence').innerText = sentence.trim();
-
-            // 0.2 mp várakozás előtt kezdje el a felolvasást
-            setTimeout(() => {
-                utterance = new SpeechSynthesisUtterance(sentence);
-
-                const rate = document.getElementById('speed-select').value;
-                utterance.rate = parseFloat(rate);
-                utterance.lang = 'en-US';
-                utterance.pitch = 1;
-
-                window.speechSynthesis.speak(utterance);
-
-                utterance.onend = function() {
-                    currentIndex++;
-                    setTimeout(speakNextSentence, 200);
-                };
-            }, 200); // 0.2 mp várakozás
-        } else {
-            isSpeaking = false;
-            changeButtonState(''); // Gomb állapot visszaállítása
+    function changeButtonState(buttonId) {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+            button.classList.add('inactive');
+        });
+        if (buttonId) {
+            document.getElementById(buttonId).classList.add('active');
+            document.getElementById(buttonId).classList.remove('inactive');
         }
     }
 
-    speakNextSentence();
-}
-
-function pauseSpeech() {
-    if (window.speechSynthesis.speaking) {
-        // Pause the speech
-        window.speechSynthesis.pause();
-        isSpeaking = false;
-        isPaused = true;
-        changeButtonState('pause-btn'); // Aktív gomb
-    }
-}
-
-function resumeSpeech() {
-    if (isPaused) {
-        if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-            // Start speech from beginning if speech is not active
-            startSpeech();
-        } else if (window.speechSynthesis.paused) {
-            // Resume the speech if it is paused
-            window.speechSynthesis.resume();
-            isSpeaking = true;
-            isPaused = false;
-            changeButtonState('resume-btn'); // Aktív gomb
+    function startSpeech() {
+        if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+            window.speechSynthesis.cancel();
         }
-    }
-}
 
-function stopSpeech() {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
+        const text = document.getElementById('text-input').value;
+        if (!text.trim()) {
+            return;
+        }
+
+        sentences = text.match(/[^.!?]*[.!?]/g) || [];
+        currentIndex = 0;
+        isSpeaking = true;
         isPaused = false;
 
-        // Inverz állapot váltás
-        const stopBtn = document.getElementById('stop-btn');
-        stopBtn.classList.toggle('active'); // Előző állapot
-        stopBtn.classList.toggle('inactive'); // Új állapot
+        changeButtonState('start-btn'); // Aktív gomb
 
-        // Show first sentence and reset speech
-        if (sentences.length > 0 && !isSpeaking) {
-            document.getElementById('current-sentence').innerText = sentences[0].trim();
+        function speakNextSentence() {
+            if (currentIndex < sentences.length) {
+                const sentence = sentences[currentIndex];
+                document.getElementById('current-sentence').innerText = sentence.trim();
+
+                // 0.2 mp várakozás előtt kezdje el a felolvasást
+                setTimeout(() => {
+                    utterance = new SpeechSynthesisUtterance(sentence);
+
+                    const rate = document.getElementById('speed-select').value;
+                    utterance.rate = parseFloat(rate);
+                    utterance.lang = 'en-US';
+                    utterance.pitch = 1;
+
+                    // Set the selected voice
+                    const selectedVoice = document.getElementById('voice-select').value;
+                    const voices = window.speechSynthesis.getVoices();
+                    utterance.voice = voices.find(voice => voice.name === selectedVoice);
+
+                    window.speechSynthesis.speak(utterance);
+
+                    utterance.onend = function() {
+                        currentIndex++;
+                        setTimeout(speakNextSentence, 200);
+                    };
+                }, 200); // 0.2 mp várakozás
+            } else {
+                isSpeaking = false;
+                changeButtonState(''); // Gomb állapot visszaállítása
+            }
         }
-        currentIndex = 0;
-        
-        changeButtonState(''); // Minden gomb deaktiválása
+
+        speakNextSentence();
     }
-}
 
-// Load placeholder text if available
-document.getElementById('text-input').value = localStorage.getItem('textInput') || '';
+    function pauseSpeech() {
+        if (window.speechSynthesis.speaking) {
+            // Pause the speech
+            window.speechSynthesis.pause();
+            isSpeaking = false;
+            isPaused = true;
+            changeButtonState('pause-btn'); // Aktív gomb
+        }
+    }
 
-// Set Start button as active initially
-changeButtonState('start-btn');
+    function resumeSpeech() {
+        if (isPaused) {
+            if (!window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+                // Start speech from beginning if speech is not active
+                startSpeech();
+            } else if (window.speechSynthesis.paused) {
+                // Resume the speech if it is paused
+                window.speechSynthesis.resume();
+                isSpeaking = true;
+                isPaused = false;
+                changeButtonState('resume-btn'); // Aktív gomb
+            }
+        }
+    }
 
-// Save text to localStorage on page unload
-window.addEventListener('beforeunload', () => {
-    localStorage.setItem('textInput', document.getElementById('text-input').value);
-});
+    function loadVoices() {
+        const voiceSelect = document.getElementById('voice-select');
+        const voices = window.speechSynthesis.getVoices();
+
+        // Clear existing options
+        voiceSelect.innerHTML = '';
+
+        voices.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.name;
+            option.textContent = voice.name;
+            voiceSelect.appendChild(option);
+        });
+    }
+
+    // Load voices when the page is loaded
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    // Set Start button as active initially
+    changeButtonState('start-btn');
+
+    // Save text to localStorage on page unload
+    window.addEventListener('beforeunload', () => {
+        localStorage.setItem('textInput', document.getElementById('text-input').value);
+    });
 </script>
 
 </body>
