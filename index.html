@@ -26,13 +26,13 @@
         color: #fff;
     }
     textarea {
-    width: 85vw; /* A szövegdoboz szélessége az oldal szélességének 85%-a */
-    height: 100px;
-    border-radius: 15px;
-    background-color: lightgrey;
-    padding: 10px;
-    box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
-}
+        width: 85vw; /* A szövegdoboz szélessége az oldal szélességének 85%-a */
+        height: 100px;
+        border-radius: 15px;
+        background-color: lightgrey;
+        padding: 10px;
+        box-sizing: border-box; /* Minden méretezés a padding-ot is tartalmazza */
+    }
     button#clear-btn {
         width: 40px; /* Gomb szélessége */
         height: 40px; /* Gomb magassága */
@@ -106,6 +106,14 @@
         </select>
     </div>
 
+    <!-- Voice selection dropdown -->
+    <div class="speed-control">
+        <label for="voice-select">Select Voice:</label>
+        <select id="voice-select">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+    </div>
+
     <div class="button-container">
         <button id="start-btn" onclick="startSpeech()">I◁</button>
         <span> </span>
@@ -120,7 +128,7 @@
         </button>
     </div>
 
-    <button onclick="stopSpeech()">■</button> <!-- Stop gomb -->
+    <button id="stop-btn" onclick="stopSpeech()">■</button> <!-- Stop gomb -->
     <span> </span>
     
     <div id="current-sentence" style="font-size: 50px; margin-top: 20px;"></div>
@@ -134,17 +142,31 @@
 
         // Function to set button states
         function changeButtonState(buttonId) {
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(button => {
-        button.classList.remove('active');
-        button.classList.add('inactive');
-    });
-    if (buttonId) {
-        document.getElementById(buttonId).classList.add('active');
-        document.getElementById(buttonId).classList.remove('inactive');
-    }
-}
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+                button.classList.add('inactive');
+            });
+            if (buttonId) {
+                const button = document.getElementById(buttonId);
+                button.classList.add('active');
+                button.classList.remove('inactive');
+            }
+        }
 
+        function populateVoiceOptions() {
+            const voiceSelect = document.getElementById('voice-select');
+            const voices = window.speechSynthesis.getVoices();
+
+            voiceSelect.innerHTML = ''; // Clear existing options
+
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = voice.name || `Voice ${index + 1}`;
+                voiceSelect.appendChild(option);
+            });
+        }
 
         function startSpeech() {
             if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
@@ -176,6 +198,12 @@
                         utterance.rate = parseFloat(rate);
                         utterance.lang = 'en-US';
                         utterance.pitch = 1;
+
+                        const selectedVoiceIndex = document.getElementById('voice-select').value;
+                        const voices = window.speechSynthesis.getVoices();
+                        if (voices[selectedVoiceIndex]) {
+                            utterance.voice = voices[selectedVoiceIndex];
+                        }
 
                         window.speechSynthesis.speak(utterance);
 
@@ -232,6 +260,9 @@
 
         // Set Start button as active initially
         changeButtonState('start-btn');
+
+        // Populate voice options when voices are loaded
+        window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
 
         // Save text to localStorage on page unload
         window.addEventListener('beforeunload', () => {
